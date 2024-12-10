@@ -14,10 +14,12 @@ repl:
 		fmt.Fprint(os.Stdout, "$ ")
 		input, _ := bufio.NewReader(os.Stdin).ReadString('\n')
 		input = strings.TrimSpace(input)
-		switch input {
-
-		case "exit 0":
+		args := strings.Split(input, " ")
+		switch args[0] {
+		case "exit":
 			break repl
+		case "echo":
+			fmt.Println(input[5:])
 		default:
 			fmt.Printf("%s: command not found\n", input)
 		}
