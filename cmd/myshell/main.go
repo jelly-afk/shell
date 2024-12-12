@@ -14,6 +14,7 @@ func main() {
 		"exit": true,
 		"echo": true,
 		"type": true,
+		"pwd":  true,
 	}
 
 repl:
@@ -39,6 +40,13 @@ repl:
 					fmt.Printf("%s is %s\n", args[1], filePath)
 				}
 			}
+		case "pwd":
+			cwd, err := os.Getwd()
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println(cwd)
+
 		default:
 			paths := strings.Split(os.Getenv("PATH"), ":")
 			filePath := findFile(paths, args[0])
