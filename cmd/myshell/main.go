@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -31,35 +32,40 @@ repl:
 				fmt.Printf("%s is a shell builtin\n", args[1])
 			} else {
 				paths := strings.Split(os.Getenv("PATH"), ":")
-				exists := false
-				var err error
-				for _, path := range paths {
-					exists, err = findFile(path, args[1])
-					if err != nil {
-						log.Fatal(err)
-					}
-					if exists {
-						fmt.Printf("%s is %s/%s\n", args[1], path, args[1])
-						break
-					}
-				}
-				if !exists {
+				filePath := findFile(paths, args[1])
+				if filePath == "" {
 					fmt.Printf("%s: not found\n", args[1])
+				} else {
+					fmt.Printf("%s is %s\n", args[1], filePath)
+				}
+			}
+		default:
+			paths := strings.Split(os.Getenv("PATH"), ":")
+			filePath := findFile(paths, args[0])
+			if filePath == "" {
+				fmt.Printf("%s: not found\n", args[0])
+			} else {
+				cmd := exec.Command(filePath, args[1:]...)
+				cmd.Stderr = os.Stderr
+				cmd.Stdout = os.Stdout
+				err := cmd.Run()
+				if err != nil {
+					log.Fatal(err)
 				}
 
 			}
-		default:
-			fmt.Printf("%s: command not found\n", input)
 		}
 	}
 }
 
-func findFile(dir, fileName string) (bool, error) {
-	entries, _ := os.ReadDir(dir)
-	for _, entry := range entries {
-		if !entry.IsDir() && entry.Name() == fileName {
-			return true, nil
+func findFile(paths []string, fileName string) string {
+	for _, path := range paths {
+		entries, _ := os.ReadDir(path)
+		for _, entry := range entries {
+			if !entry.IsDir() && entry.Name() == fileName {
+				return fmt.Sprintf("%s/%s", path, entry.Name())
+			}
 		}
 	}
-	return false, nil
+	return ""
 }
