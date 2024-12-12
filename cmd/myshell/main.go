@@ -46,6 +46,11 @@ repl:
 				log.Fatal(err)
 			}
 			fmt.Println(cwd)
+		case "cd":
+			err := os.Chdir(args[1])
+			if err != nil {
+				fmt.Printf("cd: %s: No such file or directory\n", args[1])
+			}
 
 		default:
 			paths := strings.Split(os.Getenv("PATH"), ":")
