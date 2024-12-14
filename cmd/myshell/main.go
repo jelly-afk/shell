@@ -22,12 +22,12 @@ repl:
 		fmt.Fprint(os.Stdout, "$ ")
 		input, _ := bufio.NewReader(os.Stdin).ReadString('\n')
 		input = strings.TrimSpace(input)
-		args := strings.Split(input, " ")
+		args := joinString(input)
 		switch args[0] {
 		case "exit":
 			break repl
 		case "echo":
-			fmt.Println(input[5:])
+			fmt.Println(strings.Join(args[1:], " "))
 		case "type":
 			if valid[args[1]] {
 				fmt.Printf("%s is a shell builtin\n", args[1])
@@ -85,4 +85,31 @@ func findFile(paths []string, fileName string) string {
 		}
 	}
 	return ""
+}
+
+func joinString(args string) []string {
+	res := make([]string, 0)
+	for i := 0; i < len(args); i++ {
+		c := args[i]
+		if c == ' ' {
+			continue
+		}
+		if c == '\'' {
+			idx := strings.Index(args[i+1:], "'")
+			res = append(res, args[i+1:i+idx+1])
+			i += idx + 1
+		} else {
+			idx := strings.Index(args[i+1:], " ")
+			if idx < 0 {
+				res = append(res, args[i:])
+				break
+			} else {
+				res = append(res, args[i:i+idx+1])
+				i += idx + 1
+			}
+
+		}
+	}
+	return res
+
 }
