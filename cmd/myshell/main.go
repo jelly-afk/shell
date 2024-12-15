@@ -98,6 +98,11 @@ func joinString(args string) []string {
 			idx := strings.Index(args[i+1:], "'")
 			res = append(res, args[i+1:i+idx+1])
 			i += idx + 1
+		} else if c == '"' {
+			idx := strings.Index(args[i+1:], "\"")
+			res = append(res, args[i+1:i+idx+1])
+			i += idx + 1
+
 		} else {
 			idx := strings.Index(args[i+1:], " ")
 			if idx < 0 {
