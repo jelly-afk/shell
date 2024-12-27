@@ -57,7 +57,11 @@ repl:
 			}
 
 		default:
-			paths := strings.Split(os.Getenv("PATH"), ":")
+			path := os.Getenv("PATH")
+			paths := strings.Split(path, ":")
+			if path == "" {
+				fmt.Println("no path")
+			}
 			filePath := findFile(paths, args[0])
 			if filePath == "" {
 				fmt.Printf("%s: not found\n", args[0])
@@ -104,17 +108,36 @@ func joinString(args string) []string {
 			i += idx + 1
 
 		} else {
-			idx := strings.Index(args[i+1:], " ")
-			if idx < 0 {
-				res = append(res, args[i:])
-				break
-			} else {
-				res = append(res, args[i:i+idx+1])
-				i += idx + 1
+			j := i
+			for ; j < len(args); j++ {
+				if args[j] == ' ' {
+					break
+				}
+				if args[j] == '\\' {
+					args = args[:j] + args[j+1:]
+				}
 			}
-
+			res = append(res, args[i:j])
+			i = j
 		}
 	}
 	return res
+
+}
+
+func nIndex(s string, t rune, n int) int {
+	if n < 1 {
+		return -1
+	}
+	x := 0
+	for i, c := range s {
+		if c == t {
+			x++
+		}
+		if x == n {
+			return i
+		}
+	}
+	return -1
 
 }
