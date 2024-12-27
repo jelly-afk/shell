@@ -57,11 +57,12 @@ repl:
 			}
 
 		default:
+			if len(args) < 2 {
+				fmt.Printf("%s: command not found\n", args[0])
+				break
+			}
 			path := os.Getenv("PATH")
 			paths := strings.Split(path, ":")
-			if path == "" {
-				fmt.Println("no path")
-			}
 			filePath := findFile(paths, args[0])
 			if filePath == "" {
 				fmt.Printf("%s: not found\n", args[0])
@@ -122,22 +123,5 @@ func joinString(args string) []string {
 		}
 	}
 	return res
-
-}
-
-func nIndex(s string, t rune, n int) int {
-	if n < 1 {
-		return -1
-	}
-	x := 0
-	for i, c := range s {
-		if c == t {
-			x++
-		}
-		if x == n {
-			return i
-		}
-	}
-	return -1
 
 }
