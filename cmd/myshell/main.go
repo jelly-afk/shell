@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 )
 
@@ -27,7 +28,7 @@ repl:
 		case "exit":
 			break repl
 		case "echo":
-			fmt.Println(strings.Join(args[1:], " "))
+			fmt.Println(strings.Join(args[1:], ""))
 		case "type":
 			if valid[args[1]] {
 				fmt.Printf("%s is a shell builtin\n", args[1])
@@ -104,9 +105,21 @@ func joinString(args string) []string {
 			res = append(res, args[i+1:i+idx+1])
 			i += idx + 1
 		} else if c == '"' {
-			idx := strings.Index(args[i+1:], "\"")
-			res = append(res, args[i+1:i+idx+1])
-			i += idx + 1
+			j := i + 1
+			for ; j < len(args); j++ {
+				if args[j] == '"' {
+					break
+				}
+				if args[j] == '\\' && j < len(args)-1 && slices.Index([]rune{'\\', '"', '$'}, rune(args[j+1])) >= 0 {
+					args = args[:j] + args[j+1:]
+				}
+			}
+			if len(res) > 1 && res[0] == "echo" && args[i-2] == ' ' {
+				res = append(res, " "+args[i+1:j])
+			} else {
+				res = append(res, args[i+1:j])
+			}
+			i = j
 
 		} else {
 			j := i
@@ -118,7 +131,11 @@ func joinString(args string) []string {
 					args = args[:j] + args[j+1:]
 				}
 			}
-			res = append(res, args[i:j])
+			if len(res) > 1 && res[0] == "echo" && args[i-1] == ' ' {
+				res = append(res, " "+args[i:j])
+			} else {
+				res = append(res, args[i:j])
+			}
 			i = j
 		}
 	}
